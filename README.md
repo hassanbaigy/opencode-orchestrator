@@ -10,6 +10,24 @@ rules, and close procedure) is adapted from
 [alexzh3/codex-orchestrator](https://github.com/alexzh3/codex-orchestrator). This plugin replaces
 the Codex CLI layer with a launcher built around OpenCode's real headless behavior.
 
+## Quick Install
+
+One command (checks prerequisites, then installs the plugin into Claude Code):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/hassanbaigy/opencode-orchestrator/main/install.sh | bash -s -- --with-sandbox
+```
+
+Options: `--scope user|project|local` (default `user`), `--with-sandbox` (installs the OS sandbox,
+recommended), `--dry-run`. Or from inside Claude Code:
+
+```text
+/plugin marketplace add hassanbaigy/opencode-orchestrator
+/plugin install opencode-orchestrator@opencode-orchestrator
+```
+
+Then restart Claude Code and run `/opencode-orchestrator:workflow` with a task.
+
 ## What It Does
 
 Use this plugin when you want Claude Code to supervise OpenCode agents rather than manually relay
