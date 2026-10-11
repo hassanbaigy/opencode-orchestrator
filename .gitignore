@@ -1,0 +1,9 @@
+.opencode-orchestrator/
+.claude/settings.local.json
+.pytest_cache/
+.ruff_cache/
+.venv/
+__pycache__/
+*.pyc
+.env
+uv.lock
