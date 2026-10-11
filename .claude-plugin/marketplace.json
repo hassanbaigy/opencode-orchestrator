@@ -9,7 +9,7 @@
       "name": "opencode-orchestrator",
       "source": "./",
       "description": "Coordinate reusable monitored headless OpenCode agents from Claude Code.",
-      "version": "0.3.1",
+      "version": "0.3.2",
       "author": {
         "name": "hassanbaigy"
       }

@@ -83,8 +83,8 @@ sandbox: registries are not allowlisted by default, and `srt` always blocks writ
 `.idea/`, `.git/hooks/` and `.git/config`, which many packages ship, so `pnpm install` fails with
 `EPERM` even with `--allow-network`. Run the install (`pnpm install`, `uv sync`, ...) in the
 worktree yourself first. Under the sandbox without `--allow-network`, the launcher also denies
-install commands (`pnpm`/`npm`/`yarn`/`bun install`, `npm ci`, `uv sync`, `pip install`,
-...) so a doomed install cannot leave gigabytes of partial `node_modules` behind. The launcher warns on stderr and records
+install commands anywhere in a command line (`pnpm`/`npm`/`yarn`/`bun install`, `npm ci`,
+`uv sync`, `pip install` including `python -m pip install`, ...) so a doomed install cannot leave gigabytes of partial `node_modules` behind. The launcher warns on stderr and records
 `sandbox.dependency_warnings` when a project has a lockfile but no installed dependencies; in a
 monorepo, act only on the projects the task touches. Use `--sandbox srt` to require the
 sandbox and `--sandbox none` only when the user accepts policy-only protection.

@@ -2,7 +2,7 @@
 
 [project]
 name = "opencode-orchestrator"
-version = "0.3.1"
+version = "0.3.2"
 description = "Coordinate reusable monitored headless OpenCode agents from Claude Code."
 readme = "README.md"
 requires-python = ">=3.9"

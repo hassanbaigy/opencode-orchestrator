@@ -294,6 +294,24 @@ class TestDefinitionTests(unittest.TestCase):
         self.assertEqual(changes["likely_rewritten"], [])
         self.assertEqual(len(changes["removed_without_replacement"]), 2)
 
+    def test_tests_in_new_untracked_files_count_as_added(self) -> None:
+        from opencode_orchestrator.launch import test_definition_changes
+
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = make_repo(Path(tmp) / "repo")
+            (repo / "test_old.py").write_text("def test_moved_case():\n    pass\n", encoding="utf-8")
+            git(repo, "add", ".")
+            git(repo, "commit", "-qm", "t")
+            base = git(repo, "rev-parse", "HEAD")
+            (repo / "test_old.py").write_text("", encoding="utf-8")
+            (repo / "test_new.py").write_text(
+                "def test_moved_case():\n    pass\n\ndef test_brand_new():\n    pass\n",
+                encoding="utf-8",
+            )
+            changes = test_definition_changes(repo, base)
+        self.assertEqual(changes["added"], 2)
+        self.assertEqual(changes["removed"], 0)
+
     def test_one_new_test_cannot_explain_several_deletions(self) -> None:
         from opencode_orchestrator.launch import test_definition_changes
 
@@ -465,7 +483,7 @@ class PermissionTests(unittest.TestCase):
         sandboxed = build_permission("implement", allow_network=False, extra_deny=[],
                                      deny_installs=True)
         plain = build_permission("implement", allow_network=False, extra_deny=[])
-        for pattern in ("pnpm install*", "npm ci*", "uv sync*", "pip install*"):
+        for pattern in ("*pnpm install*", "*npm ci*", "*uv sync*", "*pip install*"):
             self.assertEqual(sandboxed["bash"][pattern], "deny", pattern)
             self.assertNotIn(pattern, plain["bash"])
         # Running already-installed tools (npx tsc, npx eslint) stays allowed.

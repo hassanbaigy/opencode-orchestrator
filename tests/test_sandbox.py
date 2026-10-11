@@ -177,7 +177,7 @@ class LaunchSandboxTests(unittest.TestCase):
         script = (
             "perm = json.loads(os.environ['OPENCODE_PERMISSION'])\n"
             "print(json.dumps({'type': 'text', 'sessionID': 's', 'part': {'messageID': 'm', "
-            "'text': perm['bash'].get('pnpm install*', 'absent')}}), flush=True)\n"
+            "'text': perm['bash'].get('*pnpm install*', 'absent')}}), flush=True)\n"
             "step('stop')\n"
         )
         results = {}

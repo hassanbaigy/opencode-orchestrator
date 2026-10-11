@@ -104,12 +104,13 @@ READONLY_BASH_DENY = ["*>*", "*find * -delete*", "*find * -exec*", "*tee *", "*x
 # are blocked, and srt protects .vscode/ paths many packages ship), yet a failed pnpm install
 # still left a 1.5 GB partial node_modules in a real run. Deny them up front instead.
 INSTALL_BASH_DENY = [
-    "pnpm install*", "pnpm i", "pnpm i *", "pnpm add *",
-    "npm install*", "npm i", "npm i *", "npm ci*",
-    "yarn", "yarn install*", "yarn add *",
-    "bun install*", "bun add *",
-    "uv sync*", "uv add *", "uv pip install*", "pip install*", "pip3 install*",
-    "poetry install*",
+    # Leading wildcards also catch "cd web && pnpm install" and "python3 -m pip install".
+    "*pnpm install*", "pnpm i", "pnpm i *", "*pnpm add *",
+    "*npm install*", "npm i", "npm i *", "*npm ci*",
+    "yarn", "*yarn install*", "*yarn add *",
+    "*bun install*", "*bun add *",
+    "*uv sync*", "*uv add *", "*pip install*", "*pip3 install*",
+    "*poetry install*",
 ]
 SECRET_READ_DENY = ["*.env", "*.env.*", "**/.env", "**/.env.*"]
 SECRET_READ_ALLOW = [
@@ -427,6 +428,26 @@ def test_definition_changes(worktree: Path, base: Optional[str]) -> Optional[Dic
             removed += [f"{current_file}::{name}" for name in test_definition_names(line[1:])]
         elif line.startswith("+"):
             added += [f"{current_file}::{name}" for name in test_definition_names(line[1:])]
+    # New files are invisible to ``git diff``; scan untracked (non-ignored) files as additions.
+    try:
+        untracked = subprocess.run(
+            ["git", "-C", str(worktree), "ls-files", "-z", "--others", "--exclude-standard"],
+            capture_output=True, timeout=120, check=False,
+        )
+        untracked_names = (
+            [os.fsdecode(name) for name in untracked.stdout.split(b"\0") if name]
+            if untracked.returncode == 0
+            else []
+        )
+    except (OSError, subprocess.SubprocessError):
+        untracked_names = []
+    for name in untracked_names:
+        try:
+            text = (worktree / name).read_text(encoding="utf-8", errors="replace")
+        except (OSError, ValueError):
+            continue
+        for line in text.splitlines():
+            added += [f"{name}::{test}" for test in test_definition_names(line)]
     added_names = {entry.split("::", 1)[1] for entry in added}
     gone = [entry for entry in removed if entry.split("::", 1)[1] not in added_names]
     # A removed test with a similarly named new test in the same file is most likely rewritten
